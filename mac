@@ -95,25 +95,9 @@ fancy_echo "Starting Postgres ..."
   brew services start postgres
 ### end mac-components/start-services
 
-fancy_echo "Installing rbenv, to change Ruby versions ..."
-  brew install rbenv
-
-  if ! grep -qs "rbenv init" ~/.zshrc; then
-    printf 'export PATH="$HOME/.rbenv/bin:$PATH"\n' >> ~/.zshrc
-    printf 'eval "$(rbenv init - --no-rehash)"\n' >> ~/.zshrc
-
-    fancy_echo "Enable shims and autocompletion ..."
-      eval "$(rbenv init -)"
-  fi
-
-  export PATH="$HOME/.rbenv/bin:$PATH"
-
-fancy_echo "Installing rbenv-gem-rehash so the shell automatically picks up binaries after installing gems with binaries..."
-  brew install rbenv-gem-rehash
-
-fancy_echo "Installing ruby-build, to install Rubies ..."
-  brew install ruby-build
-### end mac-components/rbenv
+fancy_echo "Installing rvm, to change Ruby versions ..."
+  \curl -sSL https://get.rvm.io | bash -s stable
+### end common-components/rvm
 
 fancy_echo "Installing GNU Compiler Collection, a necessary prerequisite to installing Ruby ..."
   brew tap homebrew/dupes
@@ -127,18 +111,12 @@ export CC=gcc-4.2
 
 RUBY_VERSION="2.1.1"
 
+print "rvm_install_on_use_flag=1\n" >> ~/.rvmrc
+print "rvm_make_flags=\"--jobs=3\"\n" >> ~/.rvmrc
+
 fancy_echo "Installing Ruby $RUBY_VERSION ..."
-  rbenv install $RUBY_VERSION
-
-fancy_echo "Setting $RUBY_VERSION as global default Ruby ..."
-  rbenv global $RUBY_VERSION
-  rbenv rehash
-
-fancy_echo "Updating to latest Rubygems version ..."
-  gem update --system
-
-fancy_echo "Installing Bundler to install project-specific Ruby gems ..."
-  gem install bundler --no-document --pre
+  rvm install $RUBY_VERSION
+rvm alias create default $RUBY_VERSION
 ### end common-components/ruby-environment
 
 fancy_echo "Configuring Bundler for faster, parallel gem installation ..."

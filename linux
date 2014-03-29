@@ -62,7 +62,9 @@ fancy_echo "Installing sqlite3, for prototyping database-backed rails apps"
  sudo aptitude install -y libsqlite3-dev sqlite3
 
 fancy_echo "Installing Postgres, a good open source relational database ..."
-  sudo aptitude install -y postgresql postgresql-server-dev-all
+ sudo bash -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+  sudo apt-get update
+  sudo apt-get install postgresql-9.3 pgadmin3 postgresql-contrib postgresql-server-dev-all
 
 fancy_echo "Installing Redis, a good key-value database ..."
   sudo aptitude install -y redis-server
@@ -109,44 +111,18 @@ if ! which ag &>/dev/null; then
 fi
 ### end linux-components/silver-searcher-from-source
 
-if [[ ! -d "$HOME/.rbenv" ]]; then
-  fancy_echo "Installing rbenv, to change Ruby versions ..."
-    git clone git://github.com/sstephenson/rbenv.git ~/.rbenv
-
-    if ! grep -qs "rbenv init" ~/.zshrc; then
-      printf 'export PATH="$HOME/.rbenv/bin:$PATH"\n' >> ~/.zshrc
-      printf 'eval "$(rbenv init - --no-rehash)"\n' >> ~/.zshrc
-    fi
-
-    export PATH="$HOME/.rbenv/bin:$PATH"
-    eval "$(rbenv init -)"
-fi
-
-if [[ ! -d "$HOME/.rbenv/plugins/rbenv-gem-rehash" ]]; then
-  fancy_echo "Installing rbenv-gem-rehash so the shell automatically picks up binaries after installing gems with binaries..."
-    git clone https://github.com/sstephenson/rbenv-gem-rehash.git ~/.rbenv/plugins/rbenv-gem-rehash
-fi
-
-if [[ ! -d "$HOME/.rbenv/plugins/ruby-build" ]]; then
-  fancy_echo "Installing ruby-build, to install Rubies ..."
-    git clone git://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
-fi
-### end linux-components/rbenv
+fancy_echo "Installing rvm, to change Ruby versions ..."
+  \curl -sSL https://get.rvm.io | bash -s stable
+### end common-components/rvm
 
 RUBY_VERSION="2.1.1"
 
+print "rvm_install_on_use_flag=1\n" >> ~/.rvmrc
+print "rvm_make_flags=\"--jobs=3\"\n" >> ~/.rvmrc
+
 fancy_echo "Installing Ruby $RUBY_VERSION ..."
-  rbenv install $RUBY_VERSION
-
-fancy_echo "Setting $RUBY_VERSION as global default Ruby ..."
-  rbenv global $RUBY_VERSION
-  rbenv rehash
-
-fancy_echo "Updating to latest Rubygems version ..."
-  gem update --system
-
-fancy_echo "Installing Bundler to install project-specific Ruby gems ..."
-  gem install bundler --no-document --pre
+  rvm install $RUBY_VERSION
+rvm alias create default $RUBY_VERSION
 ### end common-components/ruby-environment
 
 fancy_echo "Configuring Bundler for faster, parallel gem installation ..."
