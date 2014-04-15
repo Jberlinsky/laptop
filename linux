@@ -111,21 +111,47 @@ if ! which ag &>/dev/null; then
 fi
 ### end linux-components/silver-searcher-from-source
 
-fancy_echo "Installing rvm, to change Ruby versions ..."
-  \curl -sSL https://get.rvm.io | bash -s stable
+if [[ ! -d "$HOME/.rbenv" ]]; then
+  fancy_echo "Installing rbenv, to change Ruby versions ..."
+    git clone git://github.com/sstephenson/rbenv.git ~/.rbenv
 
-source ~/.zshrc
-### end common-components/rvm
+    if ! grep -qs "rbenv init" ~/.zshrc; then
+      printf 'export PATH="$HOME/.rbenv/bin:$PATH"\n' >> ~/.zshrc
+      printf 'eval "$(rbenv init - --no-rehash)"\n' >> ~/.zshrc
+    fi
 
-RUBY_VERSION="2.1.1"
+    export PATH="$HOME/.rbenv/bin:$PATH"
+    eval "$(rbenv init -)"
+fi
 
-printf "rvm_install_on_use_flag=1\n" >> ~/.rvmrc
-printf "rvm_make_flags=\"--jobs=3\"\n" >> ~/.rvmrc
+if [[ ! -d "$HOME/.rbenv/plugins/rbenv-gem-rehash" ]]; then
+  fancy_echo "Installing rbenv-gem-rehash so the shell automatically picks up binaries after installing gems with binaries..."
+    git clone https://github.com/sstephenson/rbenv-gem-rehash.git ~/.rbenv/plugins/rbenv-gem-rehash
+fi
+
+if [[ ! -d "$HOME/.rbenv/plugins/ruby-build" ]]; then
+  fancy_echo "Installing ruby-build, to install Rubies ..."
+    git clone git://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
+fi
+### end linux-components/rbenv
+
+RUBY_VERSION="1.9.3-p545"
 
 fancy_echo "Installing Ruby $RUBY_VERSION ..."
-  rvm install $RUBY_VERSION
-rvm alias create default $RUBY_VERSION
-/bin/bash --login -c 'rvm use $RUBY_VERSION'
+  env CONFIGURE_OPTS="--with-readline-dir=$(brew --prefix readline)" CC=/usr/bin/gcc rbenv install $RUBY_VERSION
+
+fancy_echo "Setting $RUBY_VERSION as global default Ruby ..."
+  rbenv global $RUBY_VERSION
+  rbenv local $RUBY_VERSION
+  rbenv rehash
+  rbenv global $RUBY_VERSION
+  rbenv local $RUBY_VERSION
+
+fancy_echo "Updating to latest Rubygems version ..."
+  gem update --system
+
+fancy_echo "Installing Bundler to install project-specific Ruby gems ..."
+  gem install bundler --no-document --pre
 ### end common-components/ruby-environment
 
 fancy_echo "Configuring Bundler for faster, parallel gem installation ..."
