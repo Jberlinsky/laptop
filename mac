@@ -119,6 +119,7 @@ printf "rvm_make_flags=\"--jobs=3\"\n" >> ~/.rvmrc
 fancy_echo "Installing Ruby $RUBY_VERSION ..."
   rvm install $RUBY_VERSION
 rvm alias create default $RUBY_VERSION
+rvm use $RUBY_VERSION
 ### end common-components/ruby-environment
 
 fancy_echo "Configuring Bundler for faster, parallel gem installation ..."
