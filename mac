@@ -97,6 +97,8 @@ fancy_echo "Starting Postgres ..."
 
 fancy_echo "Installing rvm, to change Ruby versions ..."
   \curl -sSL https://get.rvm.io | bash -s stable
+
+source ~/.zshrc
 ### end common-components/rvm
 
 fancy_echo "Installing GNU Compiler Collection, a necessary prerequisite to installing Ruby ..."
